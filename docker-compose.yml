@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  radius:
+    image: "tpdock/freeradius"
+    environment:
+      RADIUS_CLIENTS: "secret@127.0.0.1,secret@172.17.0.0/16"
+      RADIUS_LISTEN_IP: "*"
+    volumes:
+      - './radius/users:/etc/freeradius/users'
+    ports:
+      - "1812:1812/udp"
+      - "1813:1813/udp"
+
+  openvpn:
+    image: "croc/openvpn"
+    environment:
+      RADIUS_SERVER: "127.0.0.1"
+      RADIUS_SECRET: "secret"
+      SERVER_PORT: "1194"
+    volumes:
+      - './config:/etc/openvpn'
+    privileged: true
+    network_mode: "host"
+    tty: true
+    command: "/opt/start.sh"
